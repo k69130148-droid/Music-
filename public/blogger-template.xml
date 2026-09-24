@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:responsive='true' dir='rtl' lang='ar' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta charset='utf-8'/>
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' name='viewport'/>
+  <title>نحو الدرب - تطبيق تدوين الملاحظات للهاتف</title>
+  <meta content='تطبيق بسيط وسريع وفاخر لتدوين الملاحظات مع حفظ تلقائي وبلا إنترنت وأكثر من 50 خلفية' name='description'/>
+  <b:skin><![CDATA[
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #090d16;
+      font-family: 'Cairo', 'Tajawal', sans-serif;
+    }
+    #app-frame {
+      width: 100%;
+      height: 100%;
+      height: 100vh;
+      border: none;
+      display: block;
+    }
+    .blogger-credit {
+      display: none;
+    }
+  ]]></b:skin>
+</head>
+<body>
+  <!-- تضمين تطبيق نحو الدرب ليعمل داخل بلوجر بكامل مميزاته -->
+  <iframe id='app-frame' src='https://ais-pre-nr25twiswqxgska4xzycco-613062456391.europe-west1.run.app' allow='clipboard-write; microphone;' allowfullscreen='true'></iframe>
+
+  <b:section id='main' showaddelement='no'>
+    <b:widget id='Blog1' locked='true' title='رسائل المدونة الإلكترونية' type='Blog'>
+      <b:includable id='main'/>
+    </b:widget>
+  </b:section>
+</body>
+</html>

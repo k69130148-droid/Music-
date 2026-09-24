@@ -1,0 +1,6 @@
+{
+  "name": "نحو الدرب - تدوين الملاحظات للهاتف",
+  "description": "تطبيق بسيط وسريع وفاخر لتدوين الملاحظات والحلول الدراسية للهاتف مع حفظ تلقائي ودعم للعمل بلا إنترنت وأكثر من 50 خلفية هادئة ومخصصة للمواد الدراسية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
