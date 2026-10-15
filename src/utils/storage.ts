@@ -1,7 +1,14 @@
-import { Note } from '../types/note';
+import { Note, NoteFolder } from '../types/note';
 
 const NOTES_STORAGE_KEY = 'nahwa_aldarb_notes_v2';
 const THEME_STORAGE_KEY = 'nahwa_aldarb_theme_v1';
+const FOLDERS_STORAGE_KEY = 'nahwa_aldarb_folders_v1';
+
+export const INITIAL_FOLDERS: NoteFolder[] = [
+  { id: 'folder_general', name: 'الرئيسية (عام)', icon: '🏠', color: '#10b981', createdAt: Date.now() - 100000 },
+  { id: 'folder_work', name: 'العمل والدراسة', icon: '💼', color: '#3b82f6', createdAt: Date.now() - 90000 },
+  { id: 'folder_personal', name: 'يوميات وخواطر', icon: '✨', color: '#8b5cf6', createdAt: Date.now() - 80000 },
+];
 
 export const INITIAL_NOTES: Note[] = [
   {
@@ -56,6 +63,7 @@ export const INITIAL_NOTES: Note[] = [
     backgroundId: 'forest_mist',
     fontFamily: 'Cairo',
     subject: 'عام',
+    folderId: 'folder_general',
     tags: ['ترحيب', 'أفكار'],
     stickers: ['stk_coffee', 'stk_gym'],
     pinned: true,
@@ -75,7 +83,7 @@ export const INITIAL_NOTES: Note[] = [
 3. قراءة ٢٠ دقيقة في كتاب ملهم ومفيد.
 4. ممارسة رياضة المشي الخفيف واستنشاق الهواء النقي.
 
-"الخطوات الصغيرة اليومية تقودك نحو الدرب الصحيح." ✨`,
+"الخطوات الصغيرة اليومية تقودك إلى درب النجاح." ✨`,
     checklists: [
       { id: 'chk_d1', text: 'شرب ٢ لتر ماء خلال اليوم', completed: true },
       { id: 'chk_d2', text: 'قراءة الورد اليومي', completed: true },
@@ -84,6 +92,7 @@ export const INITIAL_NOTES: Note[] = [
     backgroundId: 'cozy_coffee',
     fontFamily: 'Tajawal',
     subject: 'تطوير الذات',
+    folderId: 'folder_general',
     tags: ['يوميات', 'أهداف'],
     pinned: false,
     favorite: true,
@@ -139,5 +148,33 @@ export function saveThemeToStorage(theme: 'light' | 'dark') {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch (e) {
     console.error('Failed to save theme', e);
+  }
+}
+
+export function getSavedFolders(): NoteFolder[] {
+  try {
+    const raw = localStorage.getItem(FOLDERS_STORAGE_KEY);
+    if (!raw) {
+      localStorage.setItem(FOLDERS_STORAGE_KEY, JSON.stringify(INITIAL_FOLDERS));
+      return INITIAL_FOLDERS;
+    }
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+    return INITIAL_FOLDERS;
+  } catch (err) {
+    console.error('Error loading folders from localStorage:', err);
+    return INITIAL_FOLDERS;
+  }
+}
+
+export function saveFoldersToStorage(folders: NoteFolder[]): boolean {
+  try {
+    localStorage.setItem(FOLDERS_STORAGE_KEY, JSON.stringify(folders));
+    return true;
+  } catch (err) {
+    console.error('Error saving folders to localStorage:', err);
+    return false;
   }
 }

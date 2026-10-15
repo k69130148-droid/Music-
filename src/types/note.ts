@@ -22,7 +22,24 @@ export interface BranchNode {
   children: BranchNode[];
 }
 
-export type ArabicFont = 'Cairo' | 'Tajawal' | 'Amiri' | 'Readex Pro';
+export type ArabicFont = 
+  | 'Cairo' 
+  | 'Tajawal' 
+  | 'Amiri' 
+  | 'Readex Pro'
+  | 'Almarai'
+  | 'Aref Ruqaa'
+  | 'IBM Plex Sans Arabic'
+  | 'Marhey'
+  | 'Scheherazade New';
+
+export interface NoteFolder {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  createdAt: number;
+}
 
 export interface Note {
   id: string;
@@ -33,7 +50,9 @@ export interface Note {
   branchRoots?: BranchNode[];
   backgroundId: string;
   fontFamily: ArabicFont;
+  fontSize?: number;
   subject: string;
+  folderId?: string;
   tags: string[];
   stickers?: string[];
   pinned: boolean;

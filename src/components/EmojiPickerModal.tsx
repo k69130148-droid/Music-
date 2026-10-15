@@ -1,21 +1,30 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { EMOJI_CATEGORIES } from '../data/emojiData';
 import { X, Search, Sparkles } from 'lucide-react';
 
 interface EmojiPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectEmoji: (emoji: string) => void;
+  onSelectEmoji: (emoji: string, target: 'title' | 'content') => void;
+  activeTarget?: 'title' | 'content';
+  onChangeTarget?: (target: 'title' | 'content') => void;
 }
 
 export const EmojiPickerModal: React.FC<EmojiPickerModalProps> = ({
   isOpen,
   onClose,
   onSelectEmoji,
+  activeTarget = 'content',
+  onChangeTarget,
 }) => {
   const [selectedCatId, setSelectedCatId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lastInserted, setLastInserted] = useState<string | null>(null);
+  const [target, setTarget] = useState<'title' | 'content'>(activeTarget);
+
+  useEffect(() => {
+    setTarget(activeTarget);
+  }, [activeTarget, isOpen]);
 
   // Filter emojis
   const displayedEmojis = useMemo(() => {
@@ -35,9 +44,14 @@ export const EmojiPickerModal: React.FC<EmojiPickerModalProps> = ({
   }, [selectedCatId, searchQuery]);
 
   const handlePick = (char: string) => {
-    onSelectEmoji(char);
+    onSelectEmoji(char, target);
     setLastInserted(char);
     setTimeout(() => setLastInserted(null), 1500);
+  };
+
+  const handleSwitchTarget = (newTarget: 'title' | 'content') => {
+    setTarget(newTarget);
+    onChangeTarget?.(newTarget);
   };
 
   if (!isOpen) return null;
@@ -48,7 +62,9 @@ export const EmojiPickerModal: React.FC<EmojiPickerModalProps> = ({
       {lastInserted && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-amber-500 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-2 animate-in zoom-in-95">
           <span className="text-base">{lastInserted}</span>
-          <span>تمت الإضافة بنجاح إلى الملاحظة!</span>
+          <span>
+            {target === 'title' ? 'تمت إضافة الملصق إلى العنوان!' : 'تمت الإضافة إلى نص الملاحظة!'}
+          </span>
         </div>
       )}
 
@@ -67,7 +83,7 @@ export const EmojiPickerModal: React.FC<EmojiPickerModalProps> = ({
                 </span>
               </h2>
               <p className="text-[11px] text-slate-400">
-                اضغط على أي إيموجي لإدراجه فوراً في ملاحظتك
+                اضغط على أي إيموجي لإدراجه فوراً في العنوان أو الملاحظة
               </p>
             </div>
           </div>
@@ -79,6 +95,39 @@ export const EmojiPickerModal: React.FC<EmojiPickerModalProps> = ({
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Target Destination Switcher (العنوان 🏷️ أم نص الملاحظة 📝) */}
+        <div className="px-4 py-2.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between gap-2">
+          <span className="text-xs text-slate-300 font-bold flex items-center gap-1.5">
+            <span>🎯 إدراج في:</span>
+          </span>
+          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+            <button
+              type="button"
+              onClick={() => handleSwitchTarget('title')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                target === 'title'
+                  ? 'bg-amber-500 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>🏷️</span>
+              <span>عنوان الملاحظة</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchTarget('content')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                target === 'content'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>📝</span>
+              <span>نص الملاحظة</span>
+            </button>
+          </div>
         </div>
 
         {/* Search Bar & Tabs */}

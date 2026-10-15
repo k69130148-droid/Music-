@@ -1,7 +1,7 @@
 export interface NoteBackground {
   id: string;
   nameAr: string;
-  category: 'study' | 'calm' | 'pattern' | 'tables' | 'texts';
+  category: 'study' | 'calm' | 'pattern' | 'tables' | 'texts' | 'gym';
   categoryAr: string;
   emoji: string;
   containerClass: string;
@@ -12,7 +12,8 @@ export interface NoteBackground {
 }
 
 export const BACKGROUND_CATEGORIES = [
-  { id: 'all', nameAr: 'جميع الخلفيات (+٨٥)', emoji: '✨' },
+  { id: 'all', nameAr: 'جميع الخلفيات (+٩٥)', emoji: '✨' },
+  { id: 'gym', nameAr: 'اللياقة والجيم والرياضة', emoji: '🏋️‍♂️' },
   { id: 'tables', nameAr: 'جداول وشبكات ومربعات', emoji: '📐' },
   { id: 'texts', nameAr: 'نصوص وورق مسطر', emoji: '📝' },
   { id: 'study', nameAr: 'المواد والدراسة', emoji: '🎓' },
@@ -1321,8 +1322,166 @@ export const NOTE_BACKGROUNDS: NoteBackground[] = [
       backgroundSize: '100% 36px',
     },
   },
+
+  // ========================================================
+  // 🏋️‍♂️ 6. اللياقة والجيم والرياضة (GYM & FITNESS - 10 Backgrounds)
+  // ========================================================
+  {
+    id: 'gym_iron_beast',
+    nameAr: 'حديد وأوزان ثقيلة (Iron Beast)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🏋️‍♂️',
+    containerClass: 'bg-[#0f1115] text-slate-100',
+    textColor: 'light',
+    accentColor: '#ef4444',
+    description: 'معدن مظلم منقوش مع لمسات حمراء رياضية لتمارين القوة ورفع الأثقال',
+    inlineStyle: {
+      backgroundColor: '#0a0c10',
+      backgroundImage: `radial-gradient(ellipse at 80% 20%, rgba(239, 68, 68, 0.15) 0%, transparent 60%), linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px)`,
+      backgroundSize: '100% 100%, 100% 28px',
+    },
+  },
+  {
+    id: 'gym_neon_energy',
+    nameAr: 'طاقة النيون والتحفيز (Neon Pump)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '⚡',
+    containerClass: 'bg-[#06120d] text-emerald-100',
+    textColor: 'light',
+    accentColor: '#10b981',
+    description: 'طاقة خضراء نيونية متوهجة على خلفية داكنة محفزة للحماس وضخ الدم',
+    inlineStyle: {
+      backgroundColor: '#030c08',
+      backgroundImage: `radial-gradient(circle at 15% 15%, rgba(16, 185, 129, 0.22) 0%, transparent 55%), radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.15) 0%, transparent 55%)`,
+    },
+  },
+  {
+    id: 'gym_workout_log',
+    nameAr: 'سجل التمارين والمجموعات (Sets & Reps)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '📋',
+    containerClass: 'bg-[#111827] text-amber-100',
+    textColor: 'light',
+    accentColor: '#f59e0b',
+    description: 'شبكة مسطرة خصيصاً لتدوين الجولات والأوزان والتكرارات بدقة',
+    inlineStyle: {
+      backgroundColor: '#0f172a',
+      backgroundImage: `linear-gradient(rgba(245, 158, 11, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px)`,
+      backgroundSize: '100% 32px, 80px 100%',
+    },
+  },
+  {
+    id: 'gym_carbon_fiber',
+    nameAr: 'ألياف الكربون الرياضية (Carbon Pro)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🔥',
+    containerClass: 'bg-[#131418] text-slate-100',
+    textColor: 'light',
+    accentColor: '#f97316',
+    description: 'نسيج ألياف الكربون عالي الأداء مع لمسات برتقالية نارية',
+    inlineStyle: {
+      backgroundColor: '#101114',
+      backgroundImage: `linear-gradient(45deg, #18191f 25%, transparent 25%, transparent 75%, #18191f 75%, #18191f), linear-gradient(45deg, #18191f 25%, transparent 25%, transparent 75%, #18191f 75%, #18191f)`,
+      backgroundSize: '16px 16px',
+      backgroundPosition: '0 0, 8px 8px',
+    },
+  },
+  {
+    id: 'gym_cardio_pulse',
+    nameAr: 'كارديو ونبض القلب (Cardio Pulse)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🏃‍♂️',
+    containerClass: 'bg-[#1a0812] text-rose-100',
+    textColor: 'light',
+    accentColor: '#f43f5e',
+    description: 'موجات حيوية حمراء لحساب السعرات ومعدل ضربات القلب والمسافات',
+    inlineStyle: {
+      background: 'radial-gradient(ellipse at 50% 0%, #4c0519 0%, #17040a 70%)',
+    },
+  },
+  {
+    id: 'gym_bodybuilding_gold',
+    nameAr: 'كمال الأجسام الذهبي (Championship)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🏆',
+    containerClass: 'bg-[#0f0e0a] text-amber-100',
+    textColor: 'light',
+    accentColor: '#fbbf24',
+    description: 'فخامة الأسود الملكي مع بريق الذهب لبطولات كمال الأجسام والتحولات',
+    inlineStyle: {
+      background: 'radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.18) 0%, #080705 75%)',
+    },
+  },
+  {
+    id: 'gym_nutrition_diet',
+    nameAr: 'جدول التغذية والماكروز (Diet & Macro)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🥗',
+    containerClass: 'bg-[#f4fbf7] text-[#133221]',
+    textColor: 'dark',
+    accentColor: '#059669',
+    description: 'ورق تغذية فاتح نقي مع أسطر خضراء لتدوين السعرات والبروتين والوجبات',
+    inlineStyle: {
+      backgroundColor: '#f6fdf9',
+      backgroundImage: `linear-gradient(rgba(5, 150, 105, 0.16) 1px, transparent 1px)`,
+      backgroundSize: '100% 30px',
+    },
+  },
+  {
+    id: 'gym_calisthenics_street',
+    nameAr: 'كاليسثنيكس وبارات (Street Workout)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🤸‍♂️',
+    containerClass: 'bg-[#091522] text-cyan-100',
+    textColor: 'light',
+    accentColor: '#06b6d4',
+    description: 'طابع رياضي مدني مع أزرق فوسفوري للتحكم بوزن الجسم والعقلة والموازين',
+    inlineStyle: {
+      background: 'linear-gradient(135deg, #0e273c 0%, #06111a 60%, #03070d 100%)',
+    },
+  },
+  {
+    id: 'gym_boxing_combat',
+    nameAr: 'ملاكمة وفنون قتالية (Fight Club)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🥊',
+    containerClass: 'bg-[#180a0a] text-red-100',
+    textColor: 'light',
+    accentColor: '#dc2626',
+    description: 'أجواء حلبة القتال والنزال مع حواف داكنة مركزة ومحفزة للشراسة',
+    inlineStyle: {
+      background: 'radial-gradient(circle at center, #3f0909 0%, #120404 80%)',
+    },
+  },
+  {
+    id: 'gym_rest_recovery',
+    nameAr: 'استشفاء وسونا وراحة (Recovery Ice)',
+    category: 'gym',
+    categoryAr: 'اللياقة والجيم والرياضة',
+    emoji: '🧊',
+    containerClass: 'bg-[#07191e] text-teal-100',
+    textColor: 'light',
+    accentColor: '#2dd4bf',
+    description: 'أزرق ثلجي مريح لأيام الراحة العضلية وجلسات الاستطالة والساونا والثلج',
+    inlineStyle: {
+      background: 'radial-gradient(ellipse at 50% 100%, #115e59 0%, #041014 70%)',
+    },
+  },
 ];
 
+const BACKGROUND_MAP = new Map<string, NoteBackground>(
+  NOTE_BACKGROUNDS.map((bg) => [bg.id, bg])
+);
+
 export function getBackgroundById(id: string): NoteBackground {
-  return NOTE_BACKGROUNDS.find((bg) => bg.id === id) || NOTE_BACKGROUNDS[0];
+  return BACKGROUND_MAP.get(id) || NOTE_BACKGROUNDS[0];
 }

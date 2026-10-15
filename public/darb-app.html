@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>درب - مساحتك الهادئة للتفكير والكتابة</title>
+  <meta name="description" content="تطبيق درب - مساحتك الهادئة للتفكير والكتابة وتدوين الملاحظات والخواطر الذكية، مع حفظ تلقائي فوري وبلا إنترنت، وترتيب مرن للملاحظات وخلفيات هادئة." />
+  <meta name="theme-color" content="#059669" />
+
+  <!-- الخطوط العربية المتنوعة من Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Tajawal:wght@400;500;700;800&family=Almarai:wght@400;700;800&family=Amiri:wght@400;700&family=Readex+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cairo', 'IBM Plex Sans Arabic', 'Tajawal', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Cairo', 'Tajawal', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    input, textarea, [contenteditable="true"] {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-pop {
+      animation: fadeIn 0.15s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+  <!-- التطبيق بالكامل يدار بواسطة الجافاسكربت بدون أي خادم خارجي -->
+  <div id="app" class="min-h-screen flex flex-col"></div>
+
+  <script>
+    // --- بيانات الألوان الباستيل للملصقات (Sticky Notes) ---
+    const STICKY_THEMES = [
+      {
+        bg: 'bg-amber-100 dark:bg-amber-950/70',
+        border: 'border-amber-300 dark:border-amber-700/60',
+        text: 'text-amber-950 dark:text-amber-100',
+        subText: 'text-amber-900/80 dark:text-amber-200/70',
+        badge: 'bg-amber-200/80 dark:bg-amber-900/80 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700',
+        tape: 'bg-amber-300/60 dark:bg-amber-700/40',
+      },
+      {
+        bg: 'bg-emerald-100 dark:bg-emerald-950/70',
+        border: 'border-emerald-300 dark:border-emerald-700/60',
+        text: 'text-emerald-950 dark:text-emerald-100',
+        subText: 'text-emerald-900/80 dark:text-emerald-200/70',
+        badge: 'bg-emerald-200/80 dark:bg-emerald-900/80 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700',
+        tape: 'bg-emerald-300/60 dark:bg-emerald-700/40',
+      },
+      {
+        bg: 'bg-sky-100 dark:bg-sky-950/70',
+        border: 'border-sky-300 dark:border-sky-700/60',
+        text: 'text-sky-950 dark:text-sky-100',
+        subText: 'text-sky-900/80 dark:text-sky-200/70',
+        badge: 'bg-sky-200/80 dark:bg-sky-900/80 text-sky-900 dark:text-sky-200 border-sky-300 dark:border-sky-700',
+        tape: 'bg-sky-300/60 dark:bg-sky-700/40',
+      },
+      {
+        bg: 'bg-rose-100 dark:bg-rose-950/70',
+        border: 'border-rose-300 dark:border-rose-700/60',
+        text: 'text-rose-950 dark:text-rose-100',
+        subText: 'text-rose-900/80 dark:text-rose-200/70',
+        badge: 'bg-rose-200/80 dark:bg-rose-900/80 text-rose-900 dark:text-rose-200 border-rose-300 dark:border-rose-700',
+        tape: 'bg-rose-300/60 dark:bg-rose-700/40',
+      },
+      {
+        bg: 'bg-purple-100 dark:bg-purple-950/70',
+        border: 'border-purple-300 dark:border-purple-700/60',
+        text: 'text-purple-950 dark:text-purple-100',
+        subText: 'text-purple-900/80 dark:text-purple-200/70',
+        badge: 'bg-purple-200/80 dark:bg-purple-900/80 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-700',
+        tape: 'bg-purple-300/60 dark:bg-purple-700/40',
+      },
+      {
+        bg: 'bg-orange-100 dark:bg-orange-950/70',
+        border: 'border-orange-300 dark:border-orange-700/60',
+        text: 'text-orange-950 dark:text-orange-100',
+        subText: 'text-orange-900/80 dark:text-orange-200/70',
+        badge: 'bg-orange-200/80 dark:bg-orange-900/80 text-orange-900 dark:text-orange-200 border-orange-300 dark:border-orange-700',
+        tape: 'bg-orange-300/60 dark:bg-orange-700/40',
+      },
+    ];
+
+    // --- الحالة العامة للتطبيق ---
+    const State = {
+      theme: localStorage.getItem('darb_theme') || 'light',
+      notes: JSON.parse(localStorage.getItem('darb_notes') || 'null') || [
+        {
+          id: 'note-1',
+          title: 'أهلاً بك في تطبيق درب 🌿',
+          content: 'درب هو مساحتك الهادئة للتفكير والكتابة وتدوين الملاحظات والأفكار بكل سلاسة وبلا إنترنت.\n\n• اضغط على الملاحظة لتعديلها أو قراءتها.\n• استخدم الثلاث شرطات على الملاحظة لتحريكها لأعلى أو لأسفل.\n• يمكنك تصنيف الملاحظات في مجلدات وإضافة مهام.',
+          subject: 'ترحيب',
+          folderId: 'general',
+          favorite: true,
+          pinned: true,
+          inTrash: false,
+          fontFamily: 'Cairo',
+          createdAt: Date.now() - 3600000,
+          updatedAt: Date.now(),
+          checklists: [
+            { id: '1', text: 'تجربة إضافة ملاحظة جديدة', completed: false },
+            { id: '2', text: 'ترتيب الملاحظة باستخدام الأسهم', completed: true },
+          ]
+        },
+        {
+          id: 'note-2',
+          title: 'فكرة ملهمة للمشروع الجديد 💡',
+          content: 'التركيز على البساطة والهدوء البصري يعطي الكاتب صفاءً ذهنيًا لا يقدر بثمن.',
+          subject: 'أفكار',
+          folderId: 'general',
+          favorite: false,
+          pinned: false,
+          inTrash: false,
+          fontFamily: 'Tajawal',
+          createdAt: Date.now() - 7200000,
+          updatedAt: Date.now() - 1800000,
+          checklists: []
+        }
+      ],
+      folders: JSON.parse(localStorage.getItem('darb_folders') || 'null') || [
+        { id: 'general', name: 'عام', icon: '📁', color: '#10b981' },
+        { id: 'work', name: 'العمل والدراسة', icon: '💼', color: '#3b82f6' },
+        { id: 'ideas', name: 'أفكار وخواطر', icon: '✨', color: '#f59e0b' }
+      ],
+      activeFolderId: 'all',
+      activeCategory: 'all', // 'all' | 'favorites' | 'pinned' | 'trash'
+      searchQuery: '',
+      activeNoteId: null,
+      menuOpenNoteId: null,
+      isNewFolderModalOpen: false,
+    };
+
+    // حفظ البيانات في localStorage تلقائياً
+    function saveData() {
+      localStorage.setItem('darb_notes', JSON.stringify(State.notes));
+      localStorage.setItem('darb_folders', JSON.stringify(State.folders));
+      localStorage.setItem('darb_theme', State.theme);
+    }
+
+    // تطبيق الثيم
+    function applyTheme() {
+      if (State.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    applyTheme();
+
+    function toggleTheme() {
+      State.theme = State.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveData();
+      renderApp();
+    }
+
+    // إغلاق القوائم عند النقر بالخارج
+    window.addEventListener('click', () => {
+      if (State.menuOpenNoteId) {
+        State.menuOpenNoteId = null;
+        renderApp();
+      }
+    });
+
+    // --- عمليات الملاحظات ---
+    function createNewNote() {
+      const newNote = {
+        id: 'note-' + Date.now(),
+        title: '',
+        content: '',
+        subject: 'عام',
+        folderId: State.activeFolderId !== 'all' ? State.activeFolderId : 'general',
+        favorite: false,
+        pinned: false,
+        inTrash: false,
+        fontFamily: 'Cairo',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        checklists: []
+      };
+      State.notes.unshift(newNote);
+      State.activeNoteId = newNote.id;
+      saveData();
+      renderApp();
+    }
+
+    function updateActiveNoteField(field, value) {
+      const note = State.notes.find(n => n.id === State.activeNoteId);
+      if (note) {
+        note[field] = value;
+        note.updatedAt = Date.now();
+        saveData();
+      }
+    }
+
+    function deleteNotePermanently(id) {
+      if (confirm('هل أنت متأكد من حذف هذه الملاحظة نهائياً؟')) {
+        State.notes = State.notes.filter(n => n.id !== id);
+        if (State.activeNoteId === id) State.activeNoteId = null;
+        saveData();
+        renderApp();
+      }
+    }
+
+    function moveToTrash(id) {
+      const note = State.notes.find(n => n.id === id);
+      if (note) {
+        note.inTrash = true;
+        note.updatedAt = Date.now();
+        if (State.activeNoteId === id) State.activeNoteId = null;
+        saveData();
+        renderApp();
+      }
+    }
+
+    function restoreFromTrash(id) {
+      const note = State.notes.find(n => n.id === id);
+      if (note) {
+        note.inTrash = false;
+        note.updatedAt = Date.now();
+        saveData();
+        renderApp();
+      }
+    }
+
+    function emptyTrash() {
+      if (confirm('هل تريد إفراغ سلة المهملات بالكامل؟')) {
+        State.notes = State.notes.filter(n => !n.inTrash);
+        saveData();
+        renderApp();
+      }
+    }
+
+    // --- ترتيب الملاحظات (فوق / تحت / أول القائمة) ---
+    function getDisplayNotes() {
+      let list = State.notes;
+      if (State.activeCategory === 'trash') {
+        list = list.filter(n => n.inTrash);
+      } else {
+        list = list.filter(n => !n.inTrash);
+        if (State.activeCategory === 'favorites') {
+          list = list.filter(n => n.favorite);
+        } else if (State.activeCategory === 'pinned') {
+          list = list.filter(n => n.pinned);
+        }
+        if (State.activeFolderId !== 'all') {
+          list = list.filter(n => n.folderId === State.activeFolderId);
+        }
+      }
+      if (State.searchQuery.trim()) {
+        const q = State.searchQuery.toLowerCase();
+        list = list.filter(n => (n.title || '').toLowerCase().includes(q) || (n.content || '').toLowerCase().includes(q));
+      }
+      return list;
+    }
+
+    function moveNoteInView(index, targetIndex, displayList) {
+      if (index < 0 || targetIndex < 0 || index >= displayList.length || targetIndex >= displayList.length) return;
+      const noteToMove = displayList[index];
+      const targetNote = displayList[targetIndex];
+      const fromPos = State.notes.findIndex(n => n.id === noteToMove.id);
+      const toPos = State.notes.findIndex(n => n.id === targetNote.id);
+      if (fromPos === -1 || toPos === -1) return;
+      
+      const [item] = State.notes.splice(fromPos, 1);
+      State.notes.splice(toPos, 0, item);
+      saveData();
+      renderApp();
+    }
+
+    function moveNoteToTopInView(index, displayList) {
+      if (index <= 0) return;
+      const noteToMove = displayList[index];
+      const fromPos = State.notes.findIndex(n => n.id === noteToMove.id);
+      if (fromPos === -1) return;
+      const [item] = State.notes.splice(fromPos, 1);
+      State.notes.unshift(item);
+      saveData();
+      renderApp();
+    }
+
+    // --- أيقونات SVG نقية بدون أي مكتبة خارجية ---
+    const Icons = {
+      sun: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`,
+      moon: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`,
+      plus: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
+      search: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+      menu: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>`,
+      chevronsUp: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m17 11-5-5-5 5"/><path d="m17 18-5-5-5 5"/></svg>`,
+      arrowUp: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>`,
+      arrowDown: `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>`,
+      arrowRight: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`,
+      trash: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+      check: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+      folderPlus: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><line x1="12" x2="12" y1="10" y2="16"/><line x1="9" x2="15" y1="13" y2="13"/></svg>`,
+      rotateCcw: `<svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`
+    };
+
+    // --- رسم الواجهة الرئيسية (Home / Sticky Notes) ---
+    function renderApp() {
+      const app = document.getElementById('app');
+
+      // إذا كانت هناك ملاحظة مفتوحة للتحرير الكامل
+      if (State.activeNoteId) {
+        const activeNote = State.notes.find(n => n.id === State.activeNoteId);
+        if (activeNote) {
+          renderNoteEditor(activeNote);
+          return;
+        }
+      }
+
+      const displayList = getDisplayNotes();
+      const activeNotesCount = State.notes.filter(n => !n.inTrash).length;
+      const favCount = State.notes.filter(n => !n.inTrash && n.favorite).length;
+      const pinnedCount = State.notes.filter(n => !n.inTrash && n.pinned).length;
+      const trashCount = State.notes.filter(n => n.inTrash).length;
+
+      app.innerHTML = `
+        <!-- الهيدر الأخضر الأنيق: فقط درب ومساحتك الهادئة للتفكير والكتابة -->
+        <header class="sticky top-0 z-30 bg-emerald-50/90 dark:bg-slate-900/95 backdrop-blur-md border-b border-emerald-200/80 dark:border-emerald-950 shadow-xs">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+            <!-- Brand -->
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight leading-none">
+                درب
+              </h1>
+              <p class="text-xs sm:text-sm text-emerald-800/80 dark:text-emerald-300/80 font-medium mt-1">
+                مساحتك الهادئة للتفكير والكتابة
+              </p>
+            </div>
+
+            <!-- تبديل الوضع الداكن والفاتح -->
+            <button
+              id="theme-btn"
+              class="p-2 sm:p-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-100/60 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-slate-700 transition cursor-pointer shadow-xs"
+              title="${State.theme === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}"
+            >
+              ${State.theme === 'dark' ? Icons.sun : Icons.moon}
+            </button>
+          </div>
+        </header>
+
+        <!-- المحتوى الرئيسي للملاحظات -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+          
+          <!-- صندوق البحث -->
+          <div class="relative max-w-xl mx-auto">
+            <span class="absolute right-3.5 top-3 text-slate-400">${Icons.search}</span>
+            <input
+              type="text"
+              id="search-input"
+              value="${State.searchQuery}"
+              placeholder="ابحث في الملاحظات، الأفكار، أو الكلمات..."
+              class="w-full pr-10 pl-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-200/80 dark:border-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 shadow-xs transition"
+            />
+          </div>
+
+          <!-- شريط المجلدات والتصنيفات -->
+          <div class="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <div class="flex items-center gap-1.5 text-xs">
+              <button
+                onclick="setFolder('all')"
+                class="px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${State.activeFolderId === 'all' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'}"
+              >
+                <span>🌐 الكل</span>
+                <span class="text-[10px] opacity-75">(${activeNotesCount})</span>
+              </button>
+
+              ${State.folders.map(f => {
+                const count = State.notes.filter(n => !n.inTrash && n.folderId === f.id).length;
+                const isSelected = State.activeFolderId === f.id;
+                return `
+                  <button
+                    onclick="setFolder('${f.id}')"
+                    class="px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${isSelected ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'}"
+                  >
+                    <span>${f.icon || '📁'}</span>
+                    <span>${f.name}</span>
+                    <span class="text-[10px] opacity-75">(${count})</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <button
+              onclick="openFolderModal()"
+              class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-800 transition whitespace-nowrap cursor-pointer"
+            >
+              ${Icons.folderPlus}
+              <span>مجلد جديد</span>
+            </button>
+          </div>
+
+          <!-- ألسنة التبويب: الكل / المفضلة / المثبتة / المهملات -->
+          <div class="flex items-center justify-between gap-2 border-b border-slate-200/80 dark:border-slate-800/80 pb-2">
+            <div class="flex items-center gap-1.5 text-xs font-semibold overflow-x-auto pb-0.5 scrollbar-none">
+              <button
+                onclick="setCategory('all')"
+                class="px-3 py-1 rounded-lg whitespace-nowrap transition cursor-pointer ${State.activeCategory === 'all' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-emerald-600'}"
+              >
+                جميع الملاحظات (${activeNotesCount})
+              </button>
+              <button
+                onclick="setCategory('favorites')"
+                class="px-3 py-1 rounded-lg whitespace-nowrap transition cursor-pointer ${State.activeCategory === 'favorites' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-emerald-600'}"
+              >
+                المفضلة (${favCount})
+              </button>
+              <button
+                onclick="setCategory('pinned')"
+                class="px-3 py-1 rounded-lg whitespace-nowrap transition cursor-pointer ${State.activeCategory === 'pinned' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-emerald-600'}"
+              >
+                المثبتة (${pinnedCount})
+              </button>
+              <button
+                onclick="setCategory('trash')"
+                class="px-3 py-1 rounded-lg whitespace-nowrap transition cursor-pointer ${State.activeCategory === 'trash' ? 'bg-rose-600 text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-rose-500'}"
+              >
+                المهملات (${trashCount})
+              </button>
+            </div>
+
+            ${State.activeCategory === 'trash' && trashCount > 0 ? `
+              <button
+                onclick="emptyTrash()"
+                class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition cursor-pointer"
+              >
+                تفريغ المهملات
+              </button>
+            ` : ''}
+          </div>
+
+          <!-- زر إضافة ملاحظة جديدة فقط -->
+          <div class="flex items-center justify-start pt-1">
+            <button
+              onclick="createNewNote()"
+              class="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs sm:text-sm shadow-md shadow-emerald-600/25 active:scale-95 transition cursor-pointer"
+            >
+              ${Icons.plus}
+              <span>إضافة ملاحظة جديدة</span>
+            </button>
+          </div>
+
+          <!-- شبكة الملاحظات على شكل ملصقات (Sticky Notes) -->
+          ${displayList.length === 0 ? `
+            <div class="py-20 text-center space-y-3">
+              <div class="w-16 h-16 rounded-3xl bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800/40 flex items-center justify-center mx-auto text-emerald-600 text-2xl">
+                📝
+              </div>
+              <h3 class="font-extrabold text-lg text-slate-800 dark:text-slate-200">
+                لا توجد ملاحظات هنا بعد!
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                اضغط على زر (إضافة ملاحظة جديدة) لتبدأ بتدوين فكرتك أو خاطرتك في مساحتك الهادئة 🌿
+              </p>
+            </div>
+          ` : `
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 pb-16">
+              ${displayList.map((note, index) => {
+                const themeIndex = Math.abs(note.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % STICKY_THEMES.length;
+                const cardTheme = STICKY_THEMES[themeIndex];
+                const totalTasks = note.checklists?.length || 0;
+                const doneTasks = (note.checklists || []).filter(c => c.completed).length;
+
+                return `
+                  <div
+                    onclick="openNote('${note.id}')"
+                    class="group relative p-4 rounded-2xl border ${cardTheme.bg} ${cardTheme.border} shadow-sm hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[190px] rotate-[-0.5deg] hover:rotate-0 hover:scale-[1.02]"
+                  >
+                    <!-- شريط لاصق سكوتش في الأعلى -->
+                    <div class="w-14 h-3.5 mx-auto -mt-5 mb-2 rounded-xs ${cardTheme.tape} backdrop-blur-xs border border-white/30 shadow-xs pointer-events-none rotate-[1deg]"></div>
+
+                    <!-- رأس الملصقة -->
+                    <div>
+                      <div class="flex items-center justify-between gap-1 mb-2">
+                        <span class="text-[10px] font-black px-2 py-0.5 rounded-full border ${cardTheme.badge}">
+                          ${note.subject || 'عام'}
+                        </span>
+
+                        <!-- زر الثلاث شرطات مع الإشارات فقط بدون كتابة -->
+                        <div class="relative" onclick="event.stopPropagation()">
+                          <button
+                            type="button"
+                            onclick="toggleNoteMenu('${note.id}')"
+                            class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-black/5 dark:hover:bg-white/10 transition cursor-pointer"
+                          >
+                            ${Icons.menu}
+                          </button>
+
+                          <!-- قائمة الإشارات فقط بدون أي نصوص أو كتابة -->
+                          ${State.menuOpenNoteId === note.id ? `
+                            <div class="absolute left-0 top-8 z-50 flex items-center gap-1 bg-white dark:bg-slate-900 border border-emerald-300/80 dark:border-emerald-800 rounded-xl shadow-xl p-1 animate-pop">
+                              <!-- سهم مزدوج لأول القائمة -->
+                              <button
+                                type="button"
+                                ${index === 0 ? 'disabled' : ''}
+                                onclick="moveNoteTop(${index})"
+                                class="p-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/80 hover:text-emerald-600 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
+                              >
+                                ${Icons.chevronsUp}
+                              </button>
+
+                              <!-- سهم لأعلى -->
+                              <button
+                                type="button"
+                                ${index === 0 ? 'disabled' : ''}
+                                onclick="moveNoteUp(${index})"
+                                class="p-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/80 hover:text-emerald-600 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
+                              >
+                                ${Icons.arrowUp}
+                              </button>
+
+                              <!-- سهم لأسفل -->
+                              <button
+                                type="button"
+                                ${index === displayList.length - 1 ? 'disabled' : ''}
+                                onclick="moveNoteDown(${index})"
+                                class="p-1.5 rounded-lg text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/80 hover:text-emerald-600 disabled:opacity-25 disabled:pointer-events-none transition cursor-pointer"
+                              >
+                                ${Icons.arrowDown}
+                              </button>
+                            </div>
+                          ` : ''}
+                        </div>
+                      </div>
+
+                      <!-- عنوان الملاحظة -->
+                      <h3 style="font-family: ${note.fontFamily || 'Cairo'};" class="font-black text-sm line-clamp-2 mb-1.5 leading-snug ${cardTheme.text}">
+                        ${note.title || 'ملصقة بدون عنوان 📝'}
+                      </h3>
+
+                      <!-- نص الملاحظة -->
+                      <p class="text-xs line-clamp-4 leading-relaxed ${cardTheme.subText}">
+                        ${(note.content || '').replace(/<[^>]*>/g, '').trim() || 'اضغط هنا لبدء الكتابة في هذه الملصقة...'}
+                      </p>
+                    </div>
+
+                    <!-- تذييل الملصقة -->
+                    <div class="pt-2 mt-2 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-[10px]">
+                      <span class="font-semibold opacity-75 ${cardTheme.subText}">
+                        ${new Date(note.updatedAt).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' })}
+                      </span>
+
+                      ${totalTasks > 0 ? `
+                        <span class="font-bold flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
+                          ${Icons.check} ${doneTasks}/${totalTasks}
+                        </span>
+                      ` : ''}
+
+                      ${note.inTrash ? `
+                        <div class="flex items-center gap-1" onclick="event.stopPropagation()">
+                          <button onclick="restoreFromTrash('${note.id}')" class="text-emerald-600 font-bold hover:underline flex items-center gap-0.5">
+                            ${Icons.rotateCcw} استعادة
+                          </button>
+                          <button onclick="deleteNotePermanently('${note.id}')" class="text-rose-600 font-bold hover:underline">
+                            حذف
+                          </button>
+                        </div>
+                      ` : `
+                        <button
+                          onclick="event.stopPropagation(); moveToTrash('${note.id}')"
+                          class="opacity-0 group-hover:opacity-100 p-1 text-rose-500 hover:text-rose-700 transition"
+                          title="حذف للمهملات"
+                        >
+                          ${Icons.trash}
+                        </button>
+                      `}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </main>
+
+        <!-- مودال إنشاء مجلد جديد -->
+        ${State.isNewFolderModalOpen ? `
+          <div class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-2xl space-y-4 animate-pop">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-base">إنشاء مجلد جديد</h3>
+                <button onclick="closeFolderModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+              </div>
+              <input
+                id="new-folder-name"
+                type="text"
+                placeholder="اسم المجلد (مثال: أفكار، خواطر...)"
+                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500"
+              />
+              <div class="flex items-center gap-2 pt-2">
+                <button onclick="submitNewFolder()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition">
+                  إنشاء المجلد
+                </button>
+                <button onclick="closeFolderModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition">
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      `;
+
+      // ربط أحداث الإدخال
+      document.getElementById('theme-btn')?.addEventListener('click', toggleTheme);
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          State.searchQuery = e.target.value;
+          renderApp();
+          // إعادة التركيز على حقل البحث
+          const inputAgain = document.getElementById('search-input');
+          if (inputAgain) {
+            inputAgain.focus();
+            inputAgain.selectionStart = inputAgain.selectionEnd = inputAgain.value.length;
+          }
+        });
+      }
+    }
+
+    // --- واجهة محرر الملاحظة الكامل (Note Editor) ---
+    function renderNoteEditor(note) {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
+          <!-- شريط أدوات المحرر العلوي -->
+          <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-emerald-200/80 dark:border-slate-800 px-4 py-3 flex items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+              <!-- سهم الرجوع الأخضر النقي -->
+              <button
+                onclick="closeEditor()"
+                class="p-2 rounded-xl bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-slate-700 transition cursor-pointer"
+                title="رجوع"
+              >
+                ${Icons.arrowRight}
+              </button>
+
+              <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                مساحتك الهادئة 🌿
+              </span>
+            </div>
+
+            <!-- خيارات الملاحظة -->
+            <div class="flex items-center gap-2">
+              <select
+                id="font-select"
+                onchange="changeNoteFont(this.value)"
+                class="text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-1.5 font-bold cursor-pointer"
+              >
+                <option value="Cairo" ${note.fontFamily === 'Cairo' ? 'selected' : ''}>خط كايرو</option>
+                <option value="Tajawal" ${note.fontFamily === 'Tajawal' ? 'selected' : ''}>خط تجوال</option>
+                <option value="IBM Plex Sans Arabic" ${note.fontFamily === 'IBM Plex Sans Arabic' ? 'selected' : ''}>خط آي بي إم</option>
+                <option value="Almarai" ${note.fontFamily === 'Almarai' ? 'selected' : ''}>خط المراعي</option>
+                <option value="Amiri" ${note.fontFamily === 'Amiri' ? 'selected' : ''}>خط أميري</option>
+              </select>
+
+              <button
+                onclick="moveToTrash('${note.id}')"
+                class="p-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
+                title="نقل للمهملات"
+              >
+                ${Icons.trash}
+              </button>
+            </div>
+          </header>
+
+          <!-- مساحة التدوين والكتابة -->
+          <div class="max-w-4xl w-full mx-auto p-4 sm:p-8 flex-1 flex flex-col space-y-4">
+            <!-- العنوان -->
+            <input
+              type="text"
+              id="editor-title"
+              value="${note.title || ''}"
+              placeholder="عنوان الملاحظة..."
+              style="font-family: ${note.fontFamily || 'Cairo'};"
+              class="w-full text-xl sm:text-3xl font-black bg-transparent border-none outline-none text-slate-900 dark:text-white placeholder-slate-400"
+            />
+
+            <!-- النص الكامل -->
+            <textarea
+              id="editor-content"
+              placeholder="ابدأ بكتابة فكرتك أو خاطرتك بكل هدوء هنا..."
+              style="font-family: ${note.fontFamily || 'Cairo'};"
+              class="w-full flex-1 min-h-[400px] text-sm sm:text-base leading-relaxed bg-transparent border-none outline-none resize-none text-slate-800 dark:text-slate-200 placeholder-slate-400"
+            >${note.content || ''}</textarea>
+          </div>
+        </div>
+      `;
+
+      // الحفظ التلقائي الفوري أثناء الكتابة
+      document.getElementById('editor-title')?.addEventListener('input', (e) => {
+        updateActiveNoteField('title', e.target.value);
+      });
+      document.getElementById('editor-content')?.addEventListener('input', (e) => {
+        updateActiveNoteField('content', e.target.value);
+      });
+    }
+
+    // --- دوال مساعدة في المتصفح ---
+    function openNote(id) {
+      State.activeNoteId = id;
+      renderApp();
+    }
+    function closeEditor() {
+      State.activeNoteId = null;
+      renderApp();
+    }
+    function setFolder(folderId) {
+      State.activeFolderId = folderId;
+      renderApp();
+    }
+    function setCategory(cat) {
+      State.activeCategory = cat;
+      renderApp();
+    }
+    function toggleNoteMenu(noteId) {
+      State.menuOpenNoteId = State.menuOpenNoteId === noteId ? null : noteId;
+      renderApp();
+    }
+    function moveNoteUp(index) {
+      const list = getDisplayNotes();
+      moveNoteInView(index, index - 1, list);
+      State.menuOpenNoteId = null;
+    }
+    function moveNoteDown(index) {
+      const list = getDisplayNotes();
+      moveNoteInView(index, index + 1, list);
+      State.menuOpenNoteId = null;
+    }
+    function moveNoteTop(index) {
+      const list = getDisplayNotes();
+      moveNoteToTopInView(index, list);
+      State.menuOpenNoteId = null;
+    }
+    function changeNoteFont(font) {
+      updateActiveNoteField('fontFamily', font);
+      renderApp();
+    }
+    function openFolderModal() {
+      State.isNewFolderModalOpen = true;
+      renderApp();
+    }
+    function closeFolderModal() {
+      State.isNewFolderModalOpen = false;
+      renderApp();
+    }
+    function submitNewFolder() {
+      const input = document.getElementById('new-folder-name');
+      if (input && input.value.trim()) {
+        const newFolder = {
+          id: 'folder-' + Date.now(),
+          name: input.value.trim(),
+          icon: '📁',
+          color: '#10b981'
+        };
+        State.folders.push(newFolder);
+        State.activeFolderId = newFolder.id;
+        State.isNewFolderModalOpen = false;
+        saveData();
+        renderApp();
+      }
+    }
+
+    // بدء تشغيل التطبيق فور تحميل الصفحة
+    renderApp();
+  </script>
+</body>
+</html>

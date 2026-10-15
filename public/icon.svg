@@ -1,17 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981" />
-      <stop offset="100%" stop-color="#059669" />
-    </linearGradient>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#06130e" />
-      <stop offset="100%" stop-color="#0f291e" />
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#15803d" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#be123c" />
     </linearGradient>
   </defs>
+  <!-- Background with squircle shape -->
   <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
-  <path d="M120 140 C120 120, 140 100, 160 100 L350 100 C370 100, 390 120, 390 140 L390 370 C390 390, 370 410, 350 410 L160 410 C140 410, 120 390, 120 370 Z" fill="none" stroke="url(#grad)" stroke-width="24" stroke-linecap="round" />
-  <path d="M180 180 L330 180 M180 250 L330 250 M180 320 L270 320" stroke="#a7f3d0" stroke-width="20" stroke-linecap="round" />
-  <circle cx="340" cy="330" r="28" fill="#10b981" />
-  <path d="M330 330 L340 340 L355 320" stroke="#022c22" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  
+  <!-- Outer subtle glowing ring -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#3b82f6" stroke-width="4" opacity="0.3" stroke-dasharray="12 12" />
+
+  <!-- Google Photos Pinwheel / Drive fusion -->
+  <!-- Top petal / Blue -->
+  <path d="M256 96 C290 96 320 126 320 160 L320 256 L256 256 C222 256 192 226 192 192 C192 158 222 96 256 96 Z" fill="url(#blueGrad)" opacity="0.95"/>
+  <!-- Right petal / Amber -->
+  <path d="M416 256 C416 290 386 320 352 320 L256 320 L256 256 C256 222 286 192 320 192 C354 192 416 222 416 256 Z" fill="url(#amberGrad)" opacity="0.95"/>
+  <!-- Bottom petal / Green -->
+  <path d="M256 416 C222 416 192 386 192 352 L192 256 L256 256 C290 256 320 286 320 320 C320 354 290 416 256 416 Z" fill="url(#greenGrad)" opacity="0.95"/>
+  <!-- Left petal / Rose -->
+  <path d="M96 256 C96 222 126 192 160 192 L256 192 L256 256 C256 290 226 320 192 320 C158 320 96 290 96 256 Z" fill="url(#roseGrad)" opacity="0.95"/>
+
+  <!-- Center camera aperture badge -->
+  <circle cx="256" cy="256" r="38" fill="#ffffff" />
+  <circle cx="256" cy="256" r="26" fill="#1e293b" />
+  <circle cx="266" cy="246" r="8" fill="#38bdf8" />
+
+  <!-- Offline Wifi slash indicator badge at bottom right -->
+  <g transform="translate(330, 330)">
+    <circle cx="50" cy="50" r="44" fill="#0f172a" stroke="#334155" stroke-width="4" />
+    <path d="M28 72 L72 28" stroke="#ef4444" stroke-width="7" stroke-linecap="round" />
+    <path d="M35 52 A22 22 0 0 1 65 52" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" />
+    <circle cx="50" cy="62" r="3.5" fill="#94a3b8" />
+  </g>
 </svg>

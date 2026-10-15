@@ -18,6 +18,9 @@ import {
   RotateCcw,
   Tag,
   GraduationCap,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUp,
 } from 'lucide-react';
 
 interface NoteListProps {
@@ -38,6 +41,9 @@ interface NoteListProps {
   onDeletePermanently: (id: string) => void;
   onEmptyTrash: () => void;
   isOnline: boolean;
+  onMoveNoteUp?: (index: number) => void;
+  onMoveNoteDown?: (index: number) => void;
+  onMoveNoteToTop?: (index: number) => void;
 }
 
 export const NoteList: React.FC<NoteListProps> = ({
@@ -58,6 +64,9 @@ export const NoteList: React.FC<NoteListProps> = ({
   onDeletePermanently,
   onEmptyTrash,
   isOnline,
+  onMoveNoteUp,
+  onMoveNoteDown,
+  onMoveNoteToTop,
 }) => {
   return (
     <div className="h-full flex flex-col bg-slate-900 border-l border-slate-800 dir-rtl select-none">
@@ -70,13 +79,13 @@ export const NoteList: React.FC<NoteListProps> = ({
           <div>
             <div className="flex items-center gap-1.5">
               <h1 className="font-extrabold text-base sm:text-lg text-white tracking-wide">
-                نحو الدرب
+                درب 🌿
               </h1>
               <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
                 الملاحظات
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">تدوين سريع وبلا إنترنت مع +٥٠ خلفية</p>
+            <p className="text-[11px] text-slate-400">مساحتك الهادئة للتفكير والكتابة</p>
           </div>
         </div>
 
@@ -222,7 +231,7 @@ export const NoteList: React.FC<NoteListProps> = ({
             <p>اضغط على زر (+) في الأسفل لإنشاء أول ملاحظة لك.</p>
           </div>
         ) : (
-          notes.map((note) => {
+          notes.map((note, index) => {
             const isActive = activeNoteId === note.id;
             const bgConfig = getBackgroundById(note.backgroundId);
             const totalTasks = note.checklists.length;
@@ -256,29 +265,69 @@ export const NoteList: React.FC<NoteListProps> = ({
                 </div>
 
                 {/* Title */}
-                <h3 className="font-bold text-sm text-slate-100 line-clamp-1 mb-1">
+                <h3
+                  style={{ fontFamily: note.fontFamily || 'Cairo' }}
+                  className="font-bold text-sm text-slate-100 line-clamp-1 mb-1"
+                >
                   {note.title || 'ملاحظة بدون عنوان'}
                 </h3>
 
                 {/* Content snippet */}
                 <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-2 font-sans">
-                  {note.content || 'لا يوجد محتوى نصي...'}
+                  {((note.content || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()) || 'لا يوجد محتوى نصي...'}
                 </p>
 
-                {/* Bottom Meta & Trash controls */}
-                <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-700/40">
-                  <span className="font-medium">
-                    {new Date(note.updatedAt).toLocaleDateString('ar-SA', {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
-
-                  {totalTasks > 0 && (
-                    <span className="text-amber-400 font-semibold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {completedTasks}/{totalTasks}
+                {/* Bottom Meta & Controls */}
+                <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-700/40">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">
+                      {new Date(note.updatedAt).toLocaleDateString('ar-SA', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </span>
+
+                    {totalTasks > 0 && (
+                      <span className="text-amber-400 font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" />
+                        {completedTasks}/{totalTasks}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Reordering arrows in active view */}
+                  {!note.inTrash && onMoveNoteUp && onMoveNoteDown && (
+                    <div
+                      className="flex items-center gap-0.5 bg-slate-900/90 rounded-lg p-0.5 border border-slate-700/70 opacity-80 group-hover:opacity-100 transition"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {onMoveNoteToTop && (
+                        <button
+                          onClick={() => onMoveNoteToTop(index)}
+                          disabled={index === 0}
+                          className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-amber-400 disabled:opacity-20 disabled:hover:text-slate-400 transition"
+                          title="تثبيت ونقل لأول القائمة 🔝"
+                        >
+                          <ChevronsUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onMoveNoteUp(index)}
+                        disabled={index === 0}
+                        className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-amber-400 disabled:opacity-20 disabled:hover:text-slate-400 transition"
+                        title="تحريك لأعلى ⬆️"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5 stroke-[2.5]" />
+                      </button>
+                      <button
+                        onClick={() => onMoveNoteDown(index)}
+                        disabled={index === notes.length - 1}
+                        className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-amber-400 disabled:opacity-20 disabled:hover:text-slate-400 transition"
+                        title="تحريك لأسفل ⬇️"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                      </button>
+                    </div>
                   )}
 
                   {/* Trash controls if in trash */}

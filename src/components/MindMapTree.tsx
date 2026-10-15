@@ -166,16 +166,8 @@ export const MindMapTree: React.FC<MindMapTreeProps> = ({
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-bold flex items-center gap-1.5 opacity-90">
           <GitFork className="w-4 h-4 text-emerald-500 rotate-90" />
-          <span>الشبكة التفرعية وخريطة الأفكار:</span>
+          <span>الشبكة التفرعية وخريطة الأفكار ({branchRoots.length}):</span>
         </h4>
-        <button
-          type="button"
-          onClick={handleAddRoot}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[11px] shadow-sm transition active:scale-95 cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5 stroke-[3]" />
-          <span>إضافة شبكة تفرعية</span>
-        </button>
       </div>
 
       {branchRoots.map((root) => (

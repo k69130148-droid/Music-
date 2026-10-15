@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback, useTransition } from 'react';
-import { Note, ChecklistItem, ArabicFont, CategoryFilter } from '../types/note';
-import { getSavedNotes, saveNotesToStorage } from '../utils/storage';
+import { useState, useEffect, useCallback, useRef, useTransition, useMemo } from 'react';
+import { Note, ChecklistItem, ArabicFont, CategoryFilter, NoteFolder } from '../types/note';
+import { getSavedNotes, saveNotesToStorage, getSavedFolders, saveFoldersToStorage } from '../utils/storage';
 
 export type AutoSaveStatus = 'saved' | 'saving' | 'offline';
 
 export function useNotes() {
   const [notes, setNotes] = useState<Note[]>(() => getSavedNotes());
+  const [folders, setFolders] = useState<NoteFolder[]>(() => getSavedFolders());
+  const [activeFolderId, setActiveFolderId] = useState<string | 'all'>('folder_general');
   const [activeNoteId, setActiveNoteId] = useState<string | null>(() => {
     const initial = getSavedNotes();
     return initial.length > 0 ? initial[0].id : null;
@@ -16,6 +18,9 @@ export function useNotes() {
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('saved');
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [, startTransition] = useTransition();
+
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const statusTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Monitor online status
   useEffect(() => {
@@ -36,25 +41,35 @@ export function useNotes() {
     };
   }, []);
 
-  // Save notes to storage on update with status indicator
+  // Debounced save notes to storage to keep UI ultra responsive and 60fps smooth
   const persistNotes = useCallback((updatedNotes: Note[]) => {
     setAutoSaveStatus('saving');
-    const success = saveNotesToStorage(updatedNotes);
-    setTimeout(() => {
-      if (navigator.onLine) {
-        setAutoSaveStatus('saved');
-      } else {
-        setAutoSaveStatus('offline');
-      }
-    }, 400);
-    return success;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+
+    saveTimerRef.current = setTimeout(() => {
+      saveNotesToStorage(updatedNotes);
+      statusTimerRef.current = setTimeout(() => {
+        setAutoSaveStatus(navigator.onLine ? 'saved' : 'offline');
+      }, 150);
+    }, 200);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    };
   }, []);
 
   // Active Note helper
   const activeNote = notes.find((n) => n.id === activeNoteId) || null;
 
   // Create new note
-  const createNewNote = useCallback((subject?: string, backgroundId?: string) => {
+  const createNewNote = useCallback((subject?: string, backgroundId?: string, folderId?: string) => {
+    const targetFolder = folderId || (activeFolderId !== 'all' ? activeFolderId : 'folder_general');
     const newNote: Note = {
       id: `note_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       title: '',
@@ -63,6 +78,7 @@ export function useNotes() {
       backgroundId: backgroundId || (subject === 'الرياضيات' ? 'math' : subject === 'الفيزياء' ? 'physics' : subject === 'الكيمياء' ? 'chemistry' : 'arabic'),
       fontFamily: 'Cairo',
       subject: subject || 'عام',
+      folderId: targetFolder,
       tags: subject ? [subject] : ['جديد'],
       pinned: false,
       favorite: false,
@@ -79,7 +95,7 @@ export function useNotes() {
     });
     setActiveNoteId(newNote.id);
     return newNote;
-  }, [persistNotes]);
+  }, [activeFolderId, persistNotes]);
 
   // Update existing note
   const updateNote = useCallback((id: string, updates: Partial<Note>) => {
@@ -271,19 +287,164 @@ export function useNotes() {
     return true;
   });
 
+  // Reorder notes array
+  const reorderNotes = useCallback(
+    (newOrder: Note[]) => {
+      setNotes(newOrder);
+      persistNotes(newOrder);
+    },
+    [persistNotes]
+  );
+
+  // Move a note by index (e.g. up or down)
+  const moveNote = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      setNotes((prev) => {
+        if (fromIndex < 0 || fromIndex >= prev.length || toIndex < 0 || toIndex >= prev.length) {
+          return prev;
+        }
+        const updated = [...prev];
+        const [moved] = updated.splice(fromIndex, 1);
+        updated.splice(toIndex, 0, moved);
+        persistNotes(updated);
+        return updated;
+      });
+    },
+    [persistNotes]
+  );
+
   // Extract all subjects used
   const availableSubjects = Array.from(
     new Set(notes.map((n) => n.subject).filter(Boolean))
   );
 
+  // Folder Actions
+  const createFolder = useCallback((name: string, icon: string = '📁', color: string = '#10b981') => {
+    const newFolder: NoteFolder = {
+      id: `folder_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+      name: name.trim() || 'مجلد جديد',
+      icon,
+      color,
+      createdAt: Date.now(),
+    };
+    setFolders((prev) => {
+      const updated = [...prev, newFolder];
+      saveFoldersToStorage(updated);
+      return updated;
+    });
+    return newFolder;
+  }, []);
+
+  const updateFolder = useCallback((id: string, updates: Partial<NoteFolder>) => {
+    setFolders((prev) => {
+      const updated = prev.map((f) => (f.id === id ? { ...f, ...updates } : f));
+      saveFoldersToStorage(updated);
+      return updated;
+    });
+  }, []);
+
+  const deleteFolder = useCallback(
+    (id: string) => {
+      setFolders((prev) => {
+        const updated = prev.filter((f) => f.id !== id);
+        saveFoldersToStorage(updated);
+        return updated;
+      });
+      // Move any notes inside deleted folder to general
+      setNotes((prev) => {
+        const updated = prev.map((n) =>
+          n.folderId === id ? { ...n, folderId: 'folder_general' } : n
+        );
+        persistNotes(updated);
+        return updated;
+      });
+      if (activeFolderId === id) {
+        setActiveFolderId('all');
+      }
+    },
+    [activeFolderId, persistNotes]
+  );
+
+  const moveNoteToFolder = useCallback(
+    (noteId: string, targetFolderId: string) => {
+      updateNote(noteId, { folderId: targetFolderId });
+    },
+    [updateNote]
+  );
+
+  // Reorder notes inside whatever view/folder is currently displayed
+  const moveNoteInActiveView = useCallback(
+    (fromIndexInView: number, toIndexInView: number, currentViewNotes: Note[]) => {
+      if (
+        fromIndexInView < 0 ||
+        fromIndexInView >= currentViewNotes.length ||
+        toIndexInView < 0 ||
+        toIndexInView >= currentViewNotes.length
+      ) {
+        return;
+      }
+      const noteA = currentViewNotes[fromIndexInView];
+      const noteB = currentViewNotes[toIndexInView];
+
+      setNotes((prev) => {
+        const idxA = prev.findIndex((n) => n.id === noteA.id);
+        const idxB = prev.findIndex((n) => n.id === noteB.id);
+        if (idxA === -1 || idxB === -1) return prev;
+
+        const updated = [...prev];
+        const [moved] = updated.splice(idxA, 1);
+        const newIdxB = updated.findIndex((n) => n.id === noteB.id);
+        const insertIdx = fromIndexInView < toIndexInView ? newIdxB + 1 : newIdxB;
+        updated.splice(insertIdx, 0, moved);
+        persistNotes(updated);
+        return updated;
+      });
+    },
+    [persistNotes]
+  );
+
+  // Move note to top in current view/folder
+  const moveNoteToTopInView = useCallback(
+    (indexInView: number, currentViewNotes: Note[]) => {
+      if (indexInView <= 0 || indexInView >= currentViewNotes.length) return;
+      const targetNote = currentViewNotes[indexInView];
+      const topNoteInView = currentViewNotes[0];
+
+      setNotes((prev) => {
+        const idxA = prev.findIndex((n) => n.id === targetNote.id);
+        const idxTop = prev.findIndex((n) => n.id === topNoteInView.id);
+        if (idxA === -1 || idxTop === -1) return prev;
+
+        const updated = [...prev];
+        const [moved] = updated.splice(idxA, 1);
+        const newIdxTop = updated.findIndex((n) => n.id === topNoteInView.id);
+        updated.splice(newIdxTop, 0, moved);
+        persistNotes(updated);
+        return updated;
+      });
+    },
+    [persistNotes]
+  );
+
   return {
     notes,
+    folders,
+    activeFolderId,
+    setActiveFolderId,
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    moveNoteToFolder,
+    moveNoteInActiveView,
+    moveNoteToTopInView,
     filteredNotes,
     activeNote,
     activeNoteId,
     setActiveNoteId,
     createNewNote,
     updateNote,
+    reorderNotes,
+    moveNote,
     toggleFavorite,
     togglePin,
     toggleChecklistItem,

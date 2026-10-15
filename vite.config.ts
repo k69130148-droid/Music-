@@ -14,10 +14,10 @@ export default defineConfig(() => {
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
           id: '/',
-          name: 'نحو الدرب - ملاحظات الهاتف',
-          short_name: 'نحو الدرب',
-          description: 'تطبيق بسيط وسريع وفاخر لتدوين الملاحظات مع حفظ تلقائي وأكثر من 50 خلفية',
-          theme_color: '#0f172a',
+          name: 'درايف الصور أوفلاين - تخزين محلي آمن بدون إنترنت',
+          short_name: 'درايف أوفلاين',
+          description: 'تطبيق رفع وتخزين وإدارة الصور بدون إنترنت مثل جوجل درايف مع دعم المجلدات والبحث والخزنة السرية',
+          theme_color: '#2563eb',
           background_color: '#0f172a',
           display: 'standalone',
           start_url: '/',
@@ -38,6 +38,7 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
+          maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         },
         devOptions: {
